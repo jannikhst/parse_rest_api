@@ -30,7 +30,7 @@ void main() async {
     //try to fetch document at given reference again
     doc = await docRef.fetch();
   } catch (parseError) {
-    //print object not found because object is not readable for public
+    //prints object not found because object is not readable for public
     print(parseError);
   }
   //signIn again
@@ -51,4 +51,39 @@ void main() async {
   await user.logout();
   //delete user from server
   await user.delete();
+  //create new batch object
+  final batch = Parse.batch();
+  //create todos
+  var todos = <String>['Walk', 'Eat', 'Sleep', 'Swim'];
+  //counter
+  var x = 0;
+  //iterate through todos
+  for (var todo in todos) {
+    //create new batch task
+    batch.create('todos', {'name': todo, 'rank': ++x});
+  }
+  //new batch task: delete old document
+  batch.delete(doc.collection, doc.id);
+  //commits all batch tasks
+  await batch.commit();
+  //create new query object
+  final query = CollectionReference('todos').query();
+  //await returned documents
+  final docs = await query
+      //filter: where name is not 'Swim'
+      .where('name', QueryFilter.notEqualTo('Swim'))
+      //filter: where rank is greater than 1
+      .where('rank', QueryFilter.greaterThanOrEqual(2))
+      //order first by rank
+      .orderBy('rank')
+      //than order by name
+      .orderBy('name')
+      //return max 4 docs (default: 100)
+      .limit(4)
+      //get documents
+      .get();
+  //make sure there is no document containing 'Swim'
+  assert(!docs.any((doc) => doc.data['name'] == 'Swim'));
+  //decrement rank of first document of query result
+  await docs.first.reference.update({'rank': ParseOperation.increment(-1)});
 }
