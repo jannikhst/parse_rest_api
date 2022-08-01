@@ -1,6 +1,6 @@
-## Native Dart Parse API
+## Native Dart Parse API Client
 
-A CloudFirestore inspired Wrapper for Parse REST API. Explore more features in the example file.
+A CloudFirestore inspired Client for Parse REST API. Explore more features in the example file.
 
 ## ACL and User
 
